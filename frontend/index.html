@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Acesso Wi-Fi</title>
+    <title>Acesso a Internet</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -18,52 +18,107 @@
                 <i class="bi bi-wifi"></i>
             </div>
 
-            <div class="intro-copy">
-                <h1 class="hero-title">Acesso Wi-Fi Visitante</h1>
-                <p class="hero-text">Preencha seus dados para solicitar liberacao da internet.</p>
+            <div class="intro-copy" id="introCopy">
+                <h1 class="hero-title">CONECTE AGORA</h1>
+                <p class="hero-text">Conexao rapida. Voce esta no lugar certo para acessar o Wi-Fi.</p>
             </div>
 
             <div class="notice-strip">
-                <i class="bi bi-shield-check"></i>
-                <span>Seu cadastro e enviado com seguranca para a API do captive portal.</span>
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Libere seu acesso em poucos segundos.</span>
             </div>
 
             <div id="alertContainer"></div>
 
-            <form id="captiveForm" class="step-box active-step" novalidate>
-                <div class="mb-3">
-                    <label for="nome" class="form-label">Nome</label>
-                    <input type="text" class="form-control" id="nome" name="nome" maxlength="120" required>
+            <div id="ctaPanel" class="flow-panel">
+                <div class="d-grid">
+                    <button type="button" class="btn btn-success cta-button" id="startAccessButton">
+                        <i class="bi bi-wifi"></i>
+                        CONECTE AGORA
+                    </button>
+                </div>
+            </div>
+
+            <div id="stepsPanel" class="hidden-panel">
+                <div id="leadFlow">
+                    <div class="fade-slide">
+                        <div class="step-box active-step">
+                            <div class="step-header simple">
+                                <div class="step-title">Acesse rapido pelo Instagram</div>
+                            </div>
+
+                            <a
+                                href="#"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                id="instagramLink"
+                                class="btn instagram-button w-100 d-inline-flex align-items-center justify-content-center gap-2"
+                            >
+                                <i class="bi bi-instagram"></i>
+                                Ir para o Instagram
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="fade-slide">
+                        <div class="step-box disabled" id="stepTwoBox">
+                            <div class="step-header simple">
+                                <div class="step-title">Preencha e receba sua senha</div>
+                            </div>
+
+                            <form id="leadForm" novalidate>
+                                <div class="mb-3">
+                                    <label for="nome" class="form-label">Nome completo</label>
+                                    <input type="text" class="form-control" id="nome" name="nome" maxlength="150" disabled required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">E-mail</label>
+                                    <input type="email" class="form-control" id="email" name="email" maxlength="150" placeholder="nome@exemplo.com" disabled required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="telefone" class="form-label">Telefone</label>
+                                    <input type="tel" class="form-control" id="telefone" name="telefone" maxlength="15" placeholder="(11) 99999-9999" disabled required>
+                                </div>
+
+                                <div class="d-grid submit-wrapper">
+                                    <div class="form-check-card">
+                                        <input type="checkbox" class="form-check-input custom-check" id="checkbox" name="checkbox" value="1" disabled required>
+                                        <label for="checkbox" class="form-check-label custom-check-label">
+                                            Concordo com o envio.
+                                        </label>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-success cta-button" id="stepTwoSubmit" disabled>
+                                        Enviar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="telefone" class="form-label">Telefone</label>
-                    <input type="tel" class="form-control" id="telefone" name="telefone" maxlength="15" placeholder="(11) 99999-9999" required>
+                <div id="passwordPanel" class="hidden-panel">
+                    <div class="fade-slide">
+                        <div class="password-box mt-4">
+                            <div class="wifi-badge mb-3 badge-small">
+                                <i class="bi bi-wifi"></i>
+                            </div>
+                            <h2 class="h3 mb-2" id="passwordTitle">SENHA DO WIFI</h2>
+                            <div class="wifi-password" id="wifiPasswordText">********</div>
+                            <button type="button" class="btn btn-success w-100 copy-button" id="copyPasswordButton">
+                                <i class="bi bi-clipboard"></i>
+                                COPIAR
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary w-100 reset-button mt-3" id="resetButton">
+                                Reiniciar para novo acesso
+                            </button>
+                            <div class="copy-feedback" id="copyFeedback"></div>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="mb-3">
-                    <label for="ip" class="form-label">IP</label>
-                    <input type="text" class="form-control" id="ip" name="ip" placeholder="Preenchido automaticamente quando disponivel">
-                </div>
-
-                <div class="mb-4">
-                    <label for="macAddress" class="form-label">MAC Address</label>
-                    <input type="text" class="form-control" id="macAddress" name="macAddress" placeholder="AA:BB:CC:DD:EE:FF">
-                </div>
-
-                <button type="submit" class="btn btn-success cta-button w-100" id="submitButton">
-                    Solicitar acesso
-                </button>
-            </form>
-
-            <section id="statusPanel" class="password-box hidden-panel mt-4">
-                <h2 class="h4 mb-2">Status da Solicitacao</h2>
-                <p class="mb-3" id="statusMessage">Aguardando liberacao.</p>
-                <div class="status-meta" id="statusMeta"></div>
-                <button type="button" class="btn btn-outline-secondary w-100 reset-button mt-3" id="resetButton">
-                    Novo cadastro
-                </button>
-            </section>
+            </div>
         </section>
     </main>
 

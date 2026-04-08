@@ -1,214 +1,265 @@
 const config = window.APP_CONFIG || {};
-const storageKey = "captivePortalSession";
-let pollingTimer = null;
+const storageKey = "wifiLandingState";
+
+const defaultState = {
+    landingStarted: false,
+    instagramUnlocked: false,
+    formCompleted: false,
+    leadName: "",
+    wifiPassword: ""
+};
 
 function getApiUrl(path) {
     const baseUrl = String(config.apiBaseUrl || "").replace(/\/$/, "");
     return `${baseUrl}${path}`;
 }
 
-function saveSession(session) {
-    sessionStorage.setItem(storageKey, JSON.stringify(session));
-}
-
-function loadSession() {
+function loadState() {
     try {
         const raw = sessionStorage.getItem(storageKey);
-        return raw ? JSON.parse(raw) : null;
+        return raw ? { ...defaultState, ...JSON.parse(raw) } : { ...defaultState };
     } catch (error) {
-        return null;
+        return { ...defaultState };
     }
 }
 
-function clearSession() {
+function saveState(nextState) {
+    sessionStorage.setItem(storageKey, JSON.stringify(nextState));
+}
+
+function resetState() {
     sessionStorage.removeItem(storageKey);
 }
 
-function showAlert(type, message) {
+function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function renderAlert(type, messages) {
     const alertContainer = document.getElementById("alertContainer");
-    alertContainer.innerHTML = message
-        ? `<div class="alert alert-${type}" role="alert">${message}</div>`
-        : "";
-}
 
-function formatPhoneInput(input) {
-    let value = input.value.replace(/\D/g, "").slice(0, 11);
-
-    if (value.length > 10) {
-        value = value.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, "($1) $2-$3");
-    } else if (value.length > 6) {
-        value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
-    } else if (value.length > 2) {
-        value = value.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
-    } else if (value.length > 0) {
-        value = value.replace(/^(\d*)/, "($1");
+    if (!messages || messages.length === 0) {
+        alertContainer.innerHTML = "";
+        return;
     }
 
-    input.value = value.trim();
-}
-
-function getFormPayload() {
-    return {
-        nome: document.getElementById("nome").value.trim(),
-        telefone: document.getElementById("telefone").value,
-        ip: document.getElementById("ip").value.trim(),
-        macAddress: document.getElementById("macAddress").value.trim()
-    };
-}
-
-function validatePayload(payload) {
-    if (payload.nome.length < 3) {
-        return "Informe um nome valido.";
-    }
-
-    const phone = payload.telefone.replace(/\D/g, "");
-    if (phone.length < 10 || phone.length > 11) {
-        return "Informe um telefone valido com DDD.";
-    }
-
-    return null;
-}
-
-function renderStatus(session) {
-    const statusPanel = document.getElementById("statusPanel");
-    const statusMessage = document.getElementById("statusMessage");
-    const statusMeta = document.getElementById("statusMeta");
-
-    statusPanel.classList.remove("hidden-panel");
-
-    if (session.autorizado) {
-        statusMessage.textContent = "Acesso liberado. Seu dispositivo ja pode navegar.";
-    } else {
-        statusMessage.textContent = "Aguardando liberacao do acesso.";
-    }
-
-    statusMeta.innerHTML = `
-        <div><strong>ID:</strong> ${session.id}</div>
-        <div><strong>Nome:</strong> ${session.nome}</div>
-        <div><strong>Status:</strong> ${session.autorizado ? "Autorizado" : "Pendente"}</div>
+    const items = messages.map((message) => `<li>${escapeHtml(message)}</li>`).join("");
+    alertContainer.innerHTML = `
+        <div class="alert alert-${type}" role="alert">
+            <ul class="mb-0 ps-3">${items}</ul>
+        </div>
     `;
 }
 
-async function fetchStatus(id) {
-    const response = await fetch(getApiUrl(`/api/captive/status/${id}`));
-    const payload = await response.json();
-
-    if (!response.ok) {
-        throw new Error(payload.message || "Falha ao consultar status.");
-    }
-
-    return payload.data.usuario;
-}
-
-function startPolling(id) {
-    stopPolling();
-    pollingTimer = window.setInterval(async () => {
-        try {
-            const usuario = await fetchStatus(id);
-            const session = {
-                id: usuario.id,
-                nome: usuario.nome,
-                autorizado: usuario.autorizado
-            };
-
-            saveSession(session);
-            renderStatus(session);
-
-            if (usuario.autorizado) {
-                stopPolling();
-                showAlert("success", "Seu acesso foi liberado.");
+function revealFlowItems(selector = ".fade-slide") {
+    document.querySelectorAll(selector).forEach((wrapper, index) => {
+        window.setTimeout(() => {
+            wrapper.classList.add("show");
+            const innerCard = wrapper.querySelector(".step-box, .password-box");
+            if (innerCard) {
+                innerCard.classList.add("is-visible");
             }
-        } catch (error) {
-            showAlert("warning", error.message);
-        }
-    }, 5000);
+        }, 120 * (index + 1));
+    });
 }
 
-function stopPolling() {
-    if (pollingTimer) {
-        window.clearInterval(pollingTimer);
-        pollingTimer = null;
+function toggleLeadForm(enabled) {
+    const stepTwoBox = document.getElementById("stepTwoBox");
+    const fields = document.querySelectorAll("#leadForm input");
+    const checkbox = document.getElementById("checkbox");
+    const submitButton = document.getElementById("stepTwoSubmit");
+
+    stepTwoBox.classList.toggle("disabled", !enabled);
+    stepTwoBox.classList.toggle("active-step", enabled);
+
+    if (enabled) {
+        stepTwoBox.classList.add("is-visible");
     }
-}
 
-async function registerUser(payload) {
-    const response = await fetch(getApiUrl("/api/captive/register"), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
+    fields.forEach((field) => {
+        field.disabled = !enabled;
     });
 
-    const data = await response.json();
+    submitButton.disabled = !enabled || !checkbox.checked;
+}
 
-    if (!response.ok) {
-        const details = Array.isArray(data.errors) ? data.errors.join(" ") : data.message;
-        throw new Error(details || "Falha ao registrar usuario.");
+function renderFromState(state) {
+    const introCopy = document.getElementById("introCopy");
+    const ctaPanel = document.getElementById("ctaPanel");
+    const stepsPanel = document.getElementById("stepsPanel");
+    const leadFlow = document.getElementById("leadFlow");
+    const passwordPanel = document.getElementById("passwordPanel");
+    const passwordTitle = document.getElementById("passwordTitle");
+    const wifiPasswordText = document.getElementById("wifiPasswordText");
+    const instagramLink = document.getElementById("instagramLink");
+
+    instagramLink.href = config.instagramUrl || "#";
+
+    if (state.landingStarted) {
+        introCopy.classList.add("compact");
+        ctaPanel.classList.add("hidden-panel");
+        stepsPanel.classList.remove("hidden-panel");
+        revealFlowItems();
+    } else {
+        introCopy.classList.remove("compact");
+        ctaPanel.classList.remove("hidden-panel");
+        stepsPanel.classList.add("hidden-panel");
     }
 
-    return data.data.usuario;
+    toggleLeadForm(state.instagramUnlocked);
+
+    if (state.formCompleted) {
+        leadFlow.classList.add("hidden-panel");
+        passwordPanel.classList.remove("hidden-panel");
+        passwordTitle.textContent = state.leadName ? `SENHA DO WIFI, ${state.leadName}` : "SENHA DO WIFI";
+        wifiPasswordText.textContent = state.wifiPassword || "Defina WIFI_PASSWORD na Netlify.";
+        revealFlowItems("#passwordPanel .fade-slide");
+    } else {
+        leadFlow.classList.remove("hidden-panel");
+        passwordPanel.classList.add("hidden-panel");
+    }
+}
+
+function setupPhoneMask() {
+    const phoneInput = document.getElementById("telefone");
+
+    phoneInput.addEventListener("input", (event) => {
+        let value = event.target.value.replace(/\D/g, "").slice(0, 11);
+
+        if (value.length > 10) {
+            value = value.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, "($1) $2-$3");
+        } else if (value.length > 6) {
+            value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
+        } else if (value.length > 2) {
+            value = value.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
+        } else if (value.length > 0) {
+            value = value.replace(/^(\d*)/, "($1");
+        }
+
+        event.target.value = value.trim();
+    });
+}
+
+function setupCopyButton() {
+    const copyButton = document.getElementById("copyPasswordButton");
+    const copyFeedback = document.getElementById("copyFeedback");
+    const passwordText = document.getElementById("wifiPasswordText");
+
+    copyButton.addEventListener("click", async () => {
+        const password = passwordText.textContent.trim();
+
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(password);
+            } else {
+                const tempInput = document.createElement("input");
+                tempInput.type = "text";
+                tempInput.value = password;
+                tempInput.setAttribute("readonly", "readonly");
+                tempInput.style.position = "fixed";
+                tempInput.style.opacity = "0";
+                document.body.appendChild(tempInput);
+                tempInput.focus();
+                tempInput.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempInput);
+            }
+
+            copyFeedback.textContent = "Senha copiada.";
+        } catch (error) {
+            copyFeedback.textContent = "Copie a senha manualmente.";
+        }
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("captiveForm");
-    const submitButton = document.getElementById("submitButton");
-    const telephoneInput = document.getElementById("telefone");
+    let state = loadState();
+    const startAccessButton = document.getElementById("startAccessButton");
+    const instagramLink = document.getElementById("instagramLink");
+    const leadForm = document.getElementById("leadForm");
+    const checkbox = document.getElementById("checkbox");
+    const submitButton = document.getElementById("stepTwoSubmit");
     const resetButton = document.getElementById("resetButton");
-    const existingSession = loadSession();
 
-    telephoneInput.addEventListener("input", () => formatPhoneInput(telephoneInput));
+    renderFromState(state);
+    setupPhoneMask();
+    setupCopyButton();
 
-    if (existingSession && existingSession.id) {
-        renderStatus(existingSession);
-        if (!existingSession.autorizado) {
-            startPolling(existingSession.id);
-        }
-    }
+    startAccessButton.addEventListener("click", () => {
+        state = { ...state, landingStarted: true };
+        saveState(state);
+        renderFromState(state);
+    });
 
-    form.addEventListener("submit", async (event) => {
+    instagramLink.addEventListener("click", () => {
+        state = { ...state, landingStarted: true, instagramUnlocked: true };
+        saveState(state);
+        renderFromState(state);
+
+        window.setTimeout(() => {
+            document.getElementById("nome")?.focus();
+        }, 180);
+    });
+
+    checkbox.addEventListener("change", () => {
+        submitButton.disabled = !checkbox.checked;
+    });
+
+    leadForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        showAlert("", "");
+        renderAlert("danger", []);
 
-        const payload = getFormPayload();
-        const validationError = validatePayload(payload);
-
-        if (validationError) {
-            showAlert("danger", validationError);
-            return;
-        }
+        const payload = {
+            nome: document.getElementById("nome").value.trim(),
+            email: document.getElementById("email").value.trim(),
+            telefone: document.getElementById("telefone").value,
+            checkbox: checkbox.checked
+        };
 
         submitButton.disabled = true;
         submitButton.textContent = "Enviando...";
 
         try {
-            const usuario = await registerUser(payload);
-            const session = {
-                id: usuario.id,
-                nome: usuario.nome,
-                autorizado: usuario.autorizado
+            const response = await fetch(getApiUrl("/api/save-lead"), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                const messages = Array.isArray(data.errors) && data.errors.length > 0
+                    ? data.errors
+                    : [data.message || "Nao foi possivel salvar no banco agora."];
+                renderAlert("danger", messages);
+                return;
+            }
+
+            state = {
+                ...state,
+                formCompleted: true,
+                leadName: data.data.usuario.nome,
+                wifiPassword: data.data.wifiPassword || ""
             };
 
-            saveSession(session);
-            renderStatus(session);
-            showAlert("success", "Cadastro enviado. Agora estamos aguardando a liberacao.");
-
-            if (!usuario.autorizado) {
-                startPolling(usuario.id);
-            }
+            saveState(state);
+            renderFromState(state);
         } catch (error) {
-            showAlert("danger", error.message);
+            renderAlert("danger", ["Falha ao conectar com a API."]);
         } finally {
-            submitButton.disabled = false;
-            submitButton.textContent = "Solicitar acesso";
+            submitButton.disabled = !checkbox.checked;
+            submitButton.textContent = "Enviar";
         }
     });
 
     resetButton.addEventListener("click", () => {
-        stopPolling();
-        clearSession();
-        form.reset();
-        document.getElementById("statusPanel").classList.add("hidden-panel");
-        showAlert("", "");
+        resetState();
+        state = { ...defaultState };
+        window.location.reload();
     });
 });

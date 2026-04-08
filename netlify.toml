@@ -16,3 +16,8 @@
   from = "/api/captive/authorize/*"
   to = "/.netlify/functions/authorize?id=:splat"
   status = 200
+
+[[redirects]]
+  from = "/api/save-lead"
+  to = "/.netlify/functions/save-lead"
+  status = 200
