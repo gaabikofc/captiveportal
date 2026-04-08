@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS wifi_leads (
+    id BIGSERIAL PRIMARY KEY,
+    nome_completo VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    telefone VARCHAR(20) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

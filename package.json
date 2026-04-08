@@ -1,0 +1,13 @@
+{
+  "name": "wifi-captive-portal-netlify",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Captive portal com frontend estatico, Netlify Functions e PostgreSQL no Supabase.",
+  "scripts": {
+    "dev": "npx netlify dev",
+    "build": "echo \"Netlify project ready\""
+  },
+  "dependencies": {
+    "pg": "^8.16.0"
+  }
+}

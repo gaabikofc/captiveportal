@@ -1,0 +1,303 @@
+:root {
+    --page-bg: #eef4ef;
+    --card-bg: #ffffff;
+    --text-main: #1f2937;
+    --muted: #6b7280;
+    --success-soft: #d1e7dd;
+    --instagram: #e1306c;
+    --shadow-soft: 0 20px 45px rgba(15, 23, 42, 0.10);
+    --radius-main: 22px;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(25, 135, 84, 0.12), transparent 34%),
+        linear-gradient(180deg, #f7faf7 0%, var(--page-bg) 100%);
+    color: var(--text-main);
+}
+
+.page-shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+}
+
+.access-card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--card-bg);
+    border-radius: var(--radius-main);
+    box-shadow: var(--shadow-soft);
+    padding: 32px;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+}
+
+.wifi-badge {
+    width: 82px;
+    height: 82px;
+    border-radius: 24px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #198754, #22c55e);
+    color: #fff;
+    font-size: 2rem;
+}
+
+.badge-small {
+    margin-bottom: 14px;
+}
+
+.hero-title {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.9rem;
+    margin-bottom: 10px;
+}
+
+.hero-text {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 18px;
+}
+
+.notice-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 14px;
+    margin-bottom: 24px;
+    border-radius: 16px;
+    background: rgba(25, 135, 84, 0.08);
+    color: #166534;
+    font-weight: 600;
+    text-align: center;
+}
+
+.cta-button {
+    min-height: 68px;
+    border-radius: 18px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 14px 28px rgba(25, 135, 84, 0.24);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cta-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 32px rgba(25, 135, 84, 0.28);
+}
+
+.step-box {
+    background: #f8fafc;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 16px;
+    transform: translateY(18px);
+    opacity: 0;
+    transition: transform 0.55s ease, opacity 0.55s ease, box-shadow 0.25s ease;
+}
+
+.step-box.disabled {
+    opacity: 0.58;
+}
+
+.step-box.active-step {
+    border-color: rgba(25, 135, 84, 0.28);
+    box-shadow: 0 14px 26px rgba(25, 135, 84, 0.08);
+}
+
+.step-box.is-visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.step-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.instagram-button {
+    background: var(--instagram);
+    border-color: var(--instagram);
+    color: #fff;
+    border-radius: 14px;
+    font-weight: 600;
+    min-height: 52px;
+}
+
+.instagram-button:hover,
+.instagram-button:focus {
+    background: #c5275d;
+    border-color: #c5275d;
+    color: #fff;
+}
+
+.form-control {
+    border-radius: 14px;
+    min-height: 50px;
+}
+
+.form-check-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.form-check-card:focus-within {
+    border-color: rgba(25, 135, 84, 0.38);
+    box-shadow: 0 0 0 0.18rem rgba(25, 135, 84, 0.12);
+    background: #fafffc;
+}
+
+.form-check-input.custom-check {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.1rem;
+    border-radius: 0.45rem;
+    border: 1px solid rgba(100, 116, 139, 0.45);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.form-check-input.custom-check:checked {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.form-check-label.custom-check-label {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.submit-wrapper {
+    gap: 14px;
+}
+
+.cta-button:disabled {
+    box-shadow: none;
+    transform: none;
+    opacity: 0.7;
+}
+
+.password-box {
+    background: var(--success-soft);
+    border: 1px solid rgba(25, 135, 84, 0.18);
+    border-radius: 18px;
+    padding: 24px;
+    text-align: center;
+    transform: translateY(18px);
+    opacity: 0;
+    transition: transform 0.55s ease, opacity 0.55s ease;
+}
+
+.password-box.is-visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.wifi-password {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    margin-bottom: 18px;
+    word-break: break-word;
+}
+
+.copy-button {
+    min-height: 60px;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 0 14px 28px rgba(25, 135, 84, 0.20);
+}
+
+.reset-button {
+    min-height: 54px;
+    border-radius: 16px;
+    font-weight: 600;
+}
+
+.copy-feedback {
+    min-height: 24px;
+    color: #166534;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 12px;
+}
+
+.flow-panel {
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.flow-panel.is-exiting {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.985);
+}
+
+.intro-copy {
+    transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.intro-copy.compact {
+    opacity: 0.88;
+    transform: translateY(-2px);
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.step-header.simple {
+    justify-content: center;
+    margin-bottom: 18px;
+}
+
+.fade-slide {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.fade-slide.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.hidden-panel {
+    display: none;
+}
+
+@media (max-width: 576px) {
+    .access-card {
+        padding: 24px 18px;
+    }
+
+    .hero-title {
+        font-size: 1.6rem;
+    }
+}

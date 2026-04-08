@@ -1,0 +1,18 @@
+[build]
+  publish = "frontend"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/captive/register"
+  to = "/.netlify/functions/register"
+  status = 200
+
+[[redirects]]
+  from = "/api/captive/status/*"
+  to = "/.netlify/functions/status?id=:splat"
+  status = 200
+
+[[redirects]]
+  from = "/api/captive/authorize/*"
+  to = "/.netlify/functions/authorize?id=:splat"
+  status = 200
